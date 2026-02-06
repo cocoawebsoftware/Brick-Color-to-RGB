@@ -1,207 +1,65 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox BrickColor to RGB Converter</title>
+    <title>BrickColor Converter</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 700px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 28px;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: #555;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .results {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin-top: 30px;
-        }
-
-        .result-item {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .result-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .result-label {
-            color: #666;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .result-value {
-            color: #333;
-            font-size: 18px;
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-            word-break: break-all;
-        }
-
-        .color-preview {
-            width: 100%;
-            height: 80px;
-            border-radius: 8px;
-            border: 2px solid #e0e0e0;
-            margin-top: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .copy-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 10px;
-            transition: background 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            background: #5568d3;
-        }
-
-        .info {
-            background: #e3f2fd;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 25px;
-            color: #1976d2;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .error {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            display: none;
-        }
+        body { font-family: Arial, sans-serif; }
+        #suggestions { border: 1px solid #ccc; display: none; position: absolute; background: #fff; z-index: 1000; }
+        #suggestions div { padding: 8px; cursor: pointer; }
+        #suggestions div:hover { background: #eee; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎨 Roblox BrickColor to RGB Converter</h1>
-        
-        <div class="input-group">
-            <label for="brickColorSelect">Roblox BrickColorを選択:</label>
-            <select id="brickColorSelect">
-                <option value="">-- BrickColorを選択してください --</option>
-            </select>
-        </div>
+    <h1>BrickColor to RGB Converter</h1>
+    <input type="text" id="brickColorInput" placeholder="Enter BrickColor name" autocomplete="off" />
+    <div id="suggestions"></div>
+    <button id="convertButton">Convert</button>
+    <p id="result"></p>
 
-        <div class="input-group">
-            <label for="colorInput">または RGB値を入力 (例: 255, 0, 0 または #FF0000):</label>
-            <input type="text" id="colorInput" placeholder="例: 255, 0, 0">
-        </div>
+    <script>
+        const brickColors = ['Bright red', 'Bright blue', 'Bright green', 'Bright yellow', 'Shiny gold', 'Shiny silver']; // Add more BrickColor names as needed
 
-        <div class="results" id="results" style="display: none;">
-            <div class="result-item">
-                <div class="result-label">BrickColor名</div>
-                <div class="result-value" id="brickColorName">-</div>
-            </div>
+        const input = document.getElementById('brickColorInput');
+        const suggestions = document.getElementById('suggestions');
+        const result = document.getElementById('result');
+        const convertButton = document.getElementById('convertButton');
 
-            <div class="result-item">
-                <div class="result-label">RGB</div>
-                <div class="result-value" id="rgbResult">RGB(0, 0, 0)</div>
-            </div>
+        input.addEventListener('input', () => {
+            const value = input.value;
+            suggestions.innerHTML = '';
+            if (value) {
+                const filtered = brickColors.filter(color => color.toLowerCase().includes(value.toLowerCase()));
+                filtered.forEach(color => {
+                    const div = document.createElement('div');
+                    div.textContent = color;
+                    div.onclick = () => {
+                        input.value = color;
+                        suggestions.innerHTML = '';
+                        suggestions.style.display = 'none';
+                    };
+                    suggestions.appendChild(div);
+                });
+                if (filtered.length > 0) suggestions.style.display = 'block';
+                else suggestions.style.display = 'none';
+            } else {
+                suggestions.style.display = 'none';
+            }
+        });
 
-            <div class="result-item">
-                <div class="result-label">HEX</div>
-                <div>
-                    <div class="result-value" id="hexResult">#000000</div>
-                    <button class="copy-btn" onclick="copyToClipboard('hexResult')">コピー</button>
-                </div>
-            </div>
-
-            <div class="result-item">
-                <div class="result-label">HSV</div>
-                <div class="result-value" id="hsvResult">HSV(0°, 0%, 0%)</div>
-            </div>
-
-            <div class="result-item">
-                <div class="result-label">色プレビュー</div>
-                <div class="color-preview" id="colorPreview"></div>
-            </div>
-        </div>
-
-        <div id="error" class="error"></div>
-
-        <div class="info">
-            <strong>ℹ️ 情報:</strong> このツールはRobloxのBrickColor（ブリックカラー）パレットからRGB、HEX、HSV値に変換します。
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+        convertButton.addEventListener('click', () => {
+            const colorName = input.value;
+            const colorMap = {
+                'Bright red': '255, 0, 0',
+                'Bright blue': '0, 0, 255',
+                'Bright green': '0, 255, 0',
+                'Bright yellow': '255, 255, 0',
+                'Shiny gold': '255, 215, 0',
+                'Shiny silver': '192, 192, 192'
+            };
+            result.textContent = colorMap[colorName] ? `RGB: ${colorMap[colorName]}` : 'Invalid BrickColor name';
+        });
+    </script>
 </body>
 </html>
