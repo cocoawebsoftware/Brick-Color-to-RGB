@@ -1,24 +1,49 @@
-async function loadBrickColors() {
-    const res = await fetch("./BrickColor.txt");
-    const text = await res.text();
+console.log("script.js loaded");
 
-    const colors = {};
+const sel = document.getElementById("brick");
+const rEl = document.getElementById("r");
+const gEl = document.getElementById("g");
+const bEl = document.getElementById("b");
+const preview = document.getElementById("preview");
+
+let brickData = {};
+
+async function loadBrickColors() {
+    const res = await fetch("BrickColor.txt");
+    console.log("fetch status:", res.status);
+
+    const text = await res.text();
 
     text.split(/\r?\n/).forEach(line => {
         if (!line.trim()) return;
 
-        const [name, id, rgb255, rgb1] = line.split("\t");
+        // Name\tID\tR,G,B\tR,G,B(0–1)
+        const [name, id, rgb255] = line.split("\t");
+        if (!rgb255) return;
 
         const [r, g, b] = rgb255.split(",").map(v => Number(v.trim()));
-        const [r1, g1, b1] = rgb1.split(",").map(v => Number(v.trim()));
+        brickData[name] = { r, g, b };
+    });
+}
 
-        colors[name] = {
-            name,
-            id: Number(id),
-            rgb255: { r, g, b },
-            rgb01: { r: r1, g: g1, b: b1 }
-        };
+function show(name) {
+    const c = brickData[name];
+    if (!c) return;
+
+    rEl.textContent = c.r;
+    gEl.textContent = c.g;
+    bEl.textContent = c.b;
+    preview.style.background = `rgb(${c.r},${c.g},${c.b})`;
+}
+
+loadBrickColors().then(() => {
+    Object.keys(brickData).forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
     });
 
-    return colors;
-}
+    sel.addEventListener("change", () => show(sel.value));
+    show(sel.value);
+});
