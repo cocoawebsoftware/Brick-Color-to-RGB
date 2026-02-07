@@ -1,11 +1,13 @@
+console.log("script.js loaded");
+
 const nameInput = document.getElementById("nameInput");
-const modeSel = document.getElementById("mode");
+const modeSel   = document.getElementById("mode");
 const resultDiv = document.getElementById("result");
-const preview = document.getElementById("preview");
+const preview   = document.getElementById("preview");
 
 let brickData = {};
 
-// ---------- 変換関数 ----------
+// ---------- 変換 ----------
 function rgbToHex(r,g,b){
   return "#" + [r,g,b].map(v => v.toString(16).padStart(2,"0")).join("");
 }
@@ -27,31 +29,28 @@ function rgbToHsv(r,g,b){
   const s = max === 0 ? 0 : d / max;
   const v = max;
 
-  return {
-    h: h,
-    s: Math.round(s * 100),
-    v: Math.round(v * 100)
-  };
+  return { h, s: Math.round(s*100), v: Math.round(v*100) };
 }
 
-// ---------- コピー ----------
-function copy(text){
-  navigator.clipboard.writeText(text);
-}
-
-// ---------- 表示 ----------
-function findBrickColor(input){
+// ---------- 検索（大文字小文字無視） ----------
+function findBrick(name){
   const key = Object.keys(brickData).find(
-    k => k.toLowerCase() === input.toLowerCase()
+    k => k.toLowerCase() === name.toLowerCase()
   );
   return key ? brickData[key] : null;
 }
 
+// ---------- 表示 ----------
 function show(){
-  const name = nameInput.value.trim();
-  const c = findBrickColor(name);
+  const input = nameInput.value.trim();
   resultDiv.innerHTML = "";
 
+  if (!input) {
+    preview.style.background = "transparent";
+    return;
+  }
+
+  const c = findBrick(input);
   if (!c) {
     preview.style.background = "transparent";
     return;
@@ -63,39 +62,45 @@ function show(){
   if (modeSel.value === "rgb") {
     text = `rgb(${c.r}, ${c.g}, ${c.b})`;
   } else if (modeSel.value === "hex") {
-    text = rgbToHex(c.r, c.g, c.b);
+    text = rgbToHex(c.r,c.g,c.b);
   } else {
-    const hsv = rgbToHsv(c.r, c.g, c.b);
+    const hsv = rgbToHsv(c.r,c.g,c.b);
     text = `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)`;
   }
 
-  resultDiv.innerHTML = `
-    <div class="out">
-      <code>${text}</code>
-      <button onclick="navigator.clipboard.writeText('${text}')">Copy</button>
-    </div>
-  `;
+  const div = document.createElement("div");
+  div.className = "out";
+
+  const code = document.createElement("code");
+  code.textContent = text;
+
+  const btn = document.createElement("button");
+  btn.textContent = "Copy";
+  btn.onclick = () => navigator.clipboard.writeText(text);
+
+  div.appendChild(code);
+  div.appendChild(btn);
+  resultDiv.appendChild(div);
 }
 
 // ---------- データ読み込み ----------
 async function loadBrickColors(){
   const res = await fetch("BrickColor.txt");
-  const text = await res.text();
+  console.log("fetch status:", res.status);
 
+  const text = await res.text();
   text.split(/\r?\n/).forEach(line => {
     if (!line.trim()) return;
+    // Name\tID\tR,G,B\tR,G,B(0–1)
     const [name, id, rgb255] = line.split("\t");
     if (!rgb255) return;
-
     const [r,g,b] = rgb255.split(",").map(v => Number(v.trim()));
     brickData[name] = { r,g,b };
   });
 }
 
-// ---------- イベント ----------
+// ---------- 初期化 ----------
 loadBrickColors().then(() => {
   nameInput.addEventListener("input", show);
   modeSel.addEventListener("change", show);
-  show(); // ← これ重要
 });
-
