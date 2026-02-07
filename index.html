@@ -1,35 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>BrickColor → RGB</title>
+<style>
+  body { font-family: sans-serif; padding: 16px; }
+  #preview { width:100px; height:100px; border:1px solid #000; margin-top:8px; }
+</style>
+</head>
+<body>
+
 <select id="brick"></select>
+
 <p>
 R:<span id="r"></span>
 G:<span id="g"></span>
 B:<span id="b"></span>
 </p>
-<div id="preview" style="width:100px;height:100px;border:1px solid #000"></div>
+
+<div id="preview"></div>
 
 <script src="script.js"></script>
-<script>
-let brickData;
-
-loadBrickColors().then(data => {
-    brickData = data;
-
-    const sel = document.getElementById("brick");
-    for (const name in data) {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        sel.appendChild(opt);
-    }
-
-    sel.addEventListener("change", () => show(sel.value));
-    show(sel.value);
-});
-
-function show(name) {
-    const c = brickData[name];
-    r.textContent = c.r;
-    g.textContent = c.g;
-    b.textContent = c.b;
-    preview.style.background = `rgb(${c.r},${c.g},${c.b})`;
-}
-</script>
+</body>
+</html>
