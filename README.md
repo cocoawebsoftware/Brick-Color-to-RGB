@@ -1,3 +1,6 @@
+This Readme is in Japanese. English version is [![Button](https://img.shields.io/badge/here-black?style=flat)]([https://cocoawebsoftware.github.io/Brick-Color-to-RGB/](https://github.com/cocoawebsoftware/Brick-Color-to-RGB/blob/main/English%20README.md))
+
+---
 # 🎨 Brick Color Converter
 
 Roblox BrickColor を  
