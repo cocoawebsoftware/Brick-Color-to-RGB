@@ -100,33 +100,32 @@ let brickData={};
 let loaded=false;
 
 fetch("./BrickColor.txt")
-.then(res=>res.text())
-.then(text=>{
-  text.split(/\r?\n/).forEach(line=>{
-    if(!line.trim()) return;
+.then(res => res.text())
+.then(text => {
+  text.split(/\r?\n/).forEach(line => {
+    if (!line.trim()) return;
 
-    // 連続スペースで分割
-    const parts = line.trim().split(/\s+/);
-
-    // 名前は最初の単語
-    const name = parts[0];
-
-    // RGBは 3番目,4番目,5番目 ではなく
-    // 例: 242, 243, 243 → カンマで再解析
+    // RGBを正規表現で取得
     const rgbMatch = line.match(/(\d+),\s*(\d+),\s*(\d+)/);
-    if(!rgbMatch) return;
+    if (!rgbMatch) return;
 
     const r = Number(rgbMatch[1]);
     const g = Number(rgbMatch[2]);
     const b = Number(rgbMatch[3]);
 
-    brickData[name.toLowerCase()] = {r,g,b};
+    // RGBの前の部分を全部名前にする
+    const namePart = line.substring(0, rgbMatch.index).trim();
+
+    // IDを削除（最後の数字を除く）
+    const name = namePart.replace(/\s+\d+$/, "").trim();
+
+    brickData[name.toLowerCase()] = { r, g, b };
   });
 
   loaded = true;
   console.log("Loaded:", Object.keys(brickData).length);
 });
-
+  
 function rgbToHex(r,g,b){
   return "#"+[r,g,b].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
