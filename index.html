@@ -82,29 +82,42 @@ button:hover{background:#7686ff;}
 
 <script>
 async function loadData(){
-  const res = await fetch("BrickColor.txt");
-  const text = await res.text();
-  const lines = text.split("\\n");
 
-  const data = {};
+  try{
 
-  for(const line of lines){
-    const parts = line.split("\\t");
-    if(parts.length < 3) continue;
+    const res = await fetch("./BrickColor.txt");
+    if(!res.ok) throw new Error("HTTP " + res.status);
 
-    const name = parts[0].trim().toLowerCase();
-    const rgb = parts[2].split(",");
+    const text = await res.text();
+    const lines = text.split("\n");
+    const data = {};
 
-    data[name] = {
-      r: parseInt(rgb[0]),
-      g: parseInt(rgb[1]),
-      b: parseInt(rgb[2])
-    };
+    for(const line of lines){
+
+      if(!line.trim()) continue;
+
+      const rgbMatch = line.match(/(\d+),\s*(\d+),\s*(\d+)/);
+      if(!rgbMatch) continue;
+
+      const r = parseInt(rgbMatch[1]);
+      const g = parseInt(rgbMatch[2]);
+      const b = parseInt(rgbMatch[3]);
+
+      const beforeRGB = line.substring(0, rgbMatch.index).trim();
+      const name = beforeRGB.replace(/\s+\d+$/, "").trim().toLowerCase();
+
+      data[name] = { r, g, b };
+    }
+
+    console.log("Loaded:", Object.keys(data).length);
+    return data;
+
+  }catch(e){
+    console.error("LOAD FAILED:", e);
+    alert("BrickColor.txt 読み込み失敗");
   }
 
-  return data;
 }
-
 function rgbToHsv(r,g,b){
   r/=255; g/=255; b/=255;
 
